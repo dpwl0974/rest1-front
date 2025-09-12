@@ -2,15 +2,11 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { PostDto } from "@/type/post";
 
 export default function Home() {
   const { id } = useParams();
-
-  const [post, setPost] = useState<{
-    id: number;
-    title: string;
-    content: string;
-  } | null>(null);
+  const [post, setPost] = useState<PostDto | null>(null);
 
   useEffect(() => {
     fetch(`http://localhost:8080/api/v1/posts/${id}`)
