@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased !bg-red-100`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased !bg-red-100 border-2`}
       >
         <header>
           <nav className="flex gap-4">
