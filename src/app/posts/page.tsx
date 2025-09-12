@@ -16,13 +16,16 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-9">
       <h1>글 목록</h1>
-      <ul>
-        {posts.map((post) => (
-          <li key={post.id}>
-            {post.id} : {post.title}
-          </li>
-        ))}
-      </ul>
+      {posts.length === 0 && <div>Loading...</div>}
+      {posts.length > 0 && (
+        <ul>
+          {posts.map((post) => (
+            <li key={post.id}>
+              {post.id} : {post.title}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
