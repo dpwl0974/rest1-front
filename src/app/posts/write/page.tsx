@@ -31,8 +31,9 @@ export default function Home() {
             }),
         }).then((data) => {
             alert(data.msg);
-
-            router.push(`/posts/${data.data.postDto.id}`);
+            // push 사용 -> 작업했던 것 히스토리 남김
+            // replace 사용 -> 
+            router.replace(`/posts/${data.data.postDto.id}`);
         });
     };
 
