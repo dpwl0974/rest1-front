@@ -33,6 +33,14 @@ export default function Home() {
       method: "DELETE",
     }).then((data) => {
       alert(data.msg);
+
+      if(postComments === null) return;
+
+      // null 처리 후 넘어오는 것이므로 null일 수 없음
+      // 리렌더링을 위한 댓글 배열 교체 필요
+      setPostComments(
+        postComments.filter((postComment) => postComment.id !== commentId)
+      );
     });
   };
 
