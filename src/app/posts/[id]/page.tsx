@@ -15,7 +15,12 @@ export default function Home() {
   const [postComments, setPostComments] = useState<PostCommentDto[] | null>(null); // 로딩 중을 나타내기 위해 null로 초기값
 
   useEffect(() => {
-    fetchApi(`/api/v1/posts/${postId}`).then(setPost);
+    fetchApi(`/api/v1/posts/${postId}`)
+      .then(setPost)
+      .catch((err) => {
+        alert(err);
+        router.replace("/posts");
+      });
     fetchApi(`/api/v1/posts/${postId}/comments`).then(setPostComments);
   }, []);
 
