@@ -32,7 +32,7 @@ export default function Home() {
         }).then((data) => {
             alert(data.msg);
             // push 사용 -> 작업했던 것 히스토리 남김
-            // replace 사용 -> 
+            // replace 사용 -> 히스토리 안남김 뒤로가기 시 바로 목록으로
             router.replace(`/posts/${data.data.postDto.id}`);
         });
     };
