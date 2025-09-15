@@ -1,18 +1,84 @@
 "use client";
 
 import { fetchApi } from "@/lib/client";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { PostCommentDto, PostDto } from "@/type/post";
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
+function PostCommentListItem({
+  postComment,
+  deletePostComment,
+  postId,
+  onModifySuccess,
+}: {
+  postComment: PostCommentDto;
+  deletePostComment: (commentId: number) => void;
+  postId: number;
+  onModifySuccess: (id: number, contentValue: string) => void;
+}) {
+  const [modifyMode, setModifyMode] = useState(false);
+
+  const toggleModifyMode = () => {
+    setModifyMode(!modifyMode);
+  };
+
+  const handleModifySubmit = (e: any) => {
+    e.preventDefault();
+    const form = e.target;
+    const contentInput = form.content;
+    const contentValue = contentInput.value;
+
+    fetchApi(`/api/v1/posts/${postId}/comments/${postComment.id}`, {
+      method: "PUT",
+      body: JSON.stringify({ content: contentValue }),
+    }).then((data) => {
+      alert(data.msg);
+      toggleModifyMode();
+      onModifySuccess(postComment.id, contentValue);
+    });
+  };
+
+  return (
+    <li key={postComment.id} className="flex gap-2 items-center">
+      <span>{postComment.id} : </span>
+      {modifyMode && (
+        <form className="flex gap-2" onSubmit={handleModifySubmit}>
+          <input
+            type="text"
+            name="content"
+            defaultValue={postComment.content}
+            className="border-2 p-2 rounded"
+          />
+          <button className="border-2 p-2 rounded" type="submit">
+            저장
+          </button>
+        </form>
+      )}
+      {!modifyMode && <span>{postComment.content}</span>}
+      <button className="border-2 p-2 rounded" onClick={toggleModifyMode}>
+        {modifyMode ? "수정취소" : "수정"}
+      </button>
+      <button
+        className="border-2 p-2 rounded"
+        onClick={() => {
+          deletePostComment(postComment.id);
+        }}
+      >
+        삭제
+      </button>
+    </li>
+  );
+}
 
 export default function Home() {
   const { id: postId } = useParams();
   const router = useRouter();
 
   const [post, setPost] = useState<PostDto | null>(null);
-  const [postComments, setPostComments] = useState<PostCommentDto[] | null>(null); // 로딩 중을 나타내기 위해 null로 초기값
+  const [postComments, setPostComments] = useState<PostCommentDto[] | null>(
+    null
+  );
 
   useEffect(() => {
     fetchApi(`/api/v1/posts/${postId}`)
@@ -21,6 +87,7 @@ export default function Home() {
         alert(err);
         router.replace("/posts");
       });
+
     fetchApi(`/api/v1/posts/${postId}/comments`).then(setPostComments);
   }, []);
 
@@ -29,7 +96,7 @@ export default function Home() {
       method: "DELETE",
     }).then((data) => {
       alert(data.msg);
-      router.replace("/posts"); // 삭제 시 목록으로 & 뒤로 가기 시 목록으로
+      router.replace("/posts");
     });
   };
 
@@ -39,9 +106,8 @@ export default function Home() {
     }).then((data) => {
       alert(data.msg);
 
-      if(postComments === null) return;
+      if (postComments === null) return;
 
-      // null 처리 후 넘어오는 것이므로 null일 수 없음
       // 리렌더링을 위한 댓글 배열 교체 필요
       setPostComments(
         postComments.filter((postComment) => postComment.id !== commentId)
@@ -49,22 +115,32 @@ export default function Home() {
     });
   };
 
-  // null 이면 끊기고 아니면 return 
-  if (post == null) {
+  const onModifySuccess = (id: number, contentValue: string) => {
+    if (postComments === null) return;
+
+    setPostComments(
+      postComments.map((postComment) =>
+        postComment.id === id
+          ? { ...postComment, content: contentValue }
+          : postComment
+      )
+    );
+  };
+
+  if (post === null) {
     return <div>Loading...</div>;
   }
-
   return (
     <>
-      <h1>글 상세 보기</h1>
+      <h1 className="p-2">글 상세 보기</h1>
 
       <div>
-        <div>번호 : {post.id}</div>  {/* null이 아닐때만 수행하므로 ? 없어도 됨 */}
+        <div>번호 : {post.id}</div>
         <div>제목 : {post.title}</div>
         <div>내용 : {post.content}</div>
       </div>
 
-      <div className="flex gap-4"> {/* 위에서 null 처리 한 후 null 아닐때만 수행되도록 하여 ? 없앰 */}
+      <div className="flex gap-4">
         <Link className="border-2 p-2 rounded" href={`/posts/${post.id}/edit`}>
           수정
         </Link>
@@ -83,22 +159,17 @@ export default function Home() {
       {postComments !== null && postComments.length === 0 && (
         <div>댓글이 없습니다.</div>
       )}
+
       {postComments !== null && postComments.length > 0 && (
         <ul className="flex flex-col gap-2">
           {postComments.map((postComment) => (
-            <li key={postComment.id} className="flex gap-2 items-center">
-              <span>{postComment.id} : </span>
-              <span>{postComment.content}</span>
-              <button className="border-2 p-2 rounded">수정</button>
-              <button
-                className="border-2 p-2 rounded"
-                onClick={() => {
-                  deletePostComment(postComment.id);
-                }}
-              >
-                삭제
-              </button>
-            </li>
+            <PostCommentListItem
+              key={postComment.id}
+              postComment={postComment}
+              deletePostComment={deletePostComment}
+              postId={post.id}
+              onModifySuccess={onModifySuccess}
+            />
           ))}
         </ul>
       )}
