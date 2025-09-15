@@ -115,6 +115,35 @@ export default function Home() {
     });
   };
 
+  const handleAddPostComment = (e: any) => {
+    const form = e.target;
+    const contentInput = form.content;
+    const contentValue = contentInput.value;
+
+    if (contentValue.length === 0) {
+      alert("내용을 입력해주세요.");
+      contentInput.focus();
+      return;
+    }
+
+    if (contentValue.length < 2) {
+      alert("내용은 2자 이상 입력해주세요.");
+      contentInput.focus();
+      return;
+    }
+
+    fetchApi(`/api/v1/posts/${postId}/comments`, {
+      method: "POST",
+      body: JSON.stringify({ content: contentValue }),
+    }).then((data) => {
+      alert(data.msg);
+
+      if (postComments === null) return;
+      setPostComments([...postComments, data.data.commentDto]);
+    });
+  };
+
+
   const onModifySuccess = (id: number, contentValue: string) => {
     if (postComments === null) return;
 
@@ -156,23 +185,40 @@ export default function Home() {
 
       <h2 className="p-2">댓글 목록</h2>
       {postComments === null && <div>Loading...</div>}
-      {postComments !== null && postComments.length === 0 && (
-        <div>댓글이 없습니다.</div>
-      )}
+      <div className="flex flex-col gap-2">
+        <form
+          className="flex gap-2 items-center"
+          onSubmit={handleAddPostComment}
+        >
+          <textarea
+            rows={5}
+            name="content"
+            className="border-2 p-2 rounded"
+            maxLength={100}
+          />
+          <button type="submit" className="border-2 p-2 rounded">
+            저장
+          </button>
+        </form>
 
-      {postComments !== null && postComments.length > 0 && (
-        <ul className="flex flex-col gap-2">
-          {postComments.map((postComment) => (
-            <PostCommentListItem
-              key={postComment.id}
-              postComment={postComment}
-              deletePostComment={deletePostComment}
-              postId={post.id}
-              onModifySuccess={onModifySuccess}
-            />
-          ))}
-        </ul>
-      )}
+        {postComments !== null && postComments.length === 0 && (
+          <div>댓글이 없습니다.</div>
+        )}
+
+        {postComments !== null && postComments.length > 0 && (
+          <ul className="flex flex-col gap-2">
+            {postComments.map((postComment) => (
+              <PostCommentListItem
+                key={postComment.id}
+                postComment={postComment}
+                deletePostComment={deletePostComment}
+                postId={post.id}
+                onModifySuccess={onModifySuccess}
+              />
+            ))}
+          </ul>
+        )}
+      </div>
     </>
   );
 }
