@@ -8,15 +8,15 @@ import Link from "next/link";
 
 
 export default function Home() {
-  const { id } = useParams();
+  const { id: postId } = useParams();
   const router = useRouter();
 
   const [post, setPost] = useState<PostDto | null>(null);
   const [postComments, setPostComments] = useState<PostCommentDto[] | null>(null); // 로딩 중을 나타내기 위해 null로 초기값
 
   useEffect(() => {
-    fetchApi(`/api/v1/posts/${id}`).then(setPost);
-    fetchApi(`/api/v1/posts/${id}/comments`).then(setPostComments);
+    fetchApi(`/api/v1/posts/${postId}`).then(setPost);
+    fetchApi(`/api/v1/posts/${postId}/comments`).then(setPostComments);
   }, []);
 
   const deletePost = (id: number) => {
@@ -25,6 +25,14 @@ export default function Home() {
     }).then((data) => {
       alert(data.msg);
       router.replace("/posts"); // 삭제 시 목록으로 & 뒤로 가기 시 목록으로
+    });
+  };
+
+  const deletePostComment = (commentId: number) => {
+    fetchApi(`/api/v1/posts/${postId}/comments/${commentId}`, {
+      method: "DELETE",
+    }).then((data) => {
+      alert(data.msg);
     });
   };
 
@@ -63,10 +71,20 @@ export default function Home() {
         <div>댓글이 없습니다.</div>
       )}
       {postComments !== null && postComments.length > 0 && (
-        <ul>
+        <ul className="flex flex-col gap-2">
           {postComments.map((postComment) => (
-            <li key={postComment.id}>
-              {postComment.id} : {postComment.content}
+            <li key={postComment.id} className="flex gap-2 items-center">
+              <span>{postComment.id} : </span>
+              <span>{postComment.content}</span>
+              <button className="border-2 p-2 rounded">수정</button>
+              <button
+                className="border-2 p-2 rounded"
+                onClick={() => {
+                  deletePostComment(postComment.id);
+                }}
+              >
+                삭제
+              </button>
             </li>
           ))}
         </ul>
