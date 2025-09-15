@@ -18,9 +18,21 @@ export default function Home() {
             titleInput.focus();
         }
 
+        if (titleInput.value.length < 2) {
+            alert("제목은 2자 이상 입력해주세요.");
+            titleInput.focus();
+            return;
+        }
+
         if (contentText.value.length === 0) {
             alert("내용을 입력해주세요.");
             contentText.focus();
+        }
+
+        if (contentText.value.length < 2) {
+            alert("내용은 2자 이상 입력해주세요.");
+            contentText.focus();
+            return;
         }
 
         fetchApi(`/api/v1/posts`, {
@@ -46,11 +58,13 @@ export default function Home() {
                     type="text"
                     name="title"
                     placeholder="제목"
+                    maxLength={10}
                 />
                 <textarea
                     className="border border-gray-300 rounded p-2"
                     name="content"
                     placeholder="내용"
+                    maxLength={100}
                 />
                 <button className="bg-blue-500 text-white p-2 rounded" type="submit">
                     저장
