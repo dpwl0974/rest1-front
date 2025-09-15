@@ -1,4 +1,5 @@
 "use client"; // 클라이언트 사이드 렌더링 - 만들 때마다 생성
+import { fetchApi } from "@/lib/client";
 
 export default function Home() {
     const handleSubmit = (e: any) => {
@@ -18,20 +19,16 @@ export default function Home() {
             alert("내용을 입력해주세요.");
             contentText.focus();
         }
-        fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/posts`, {
+
+        fetchApi(`/api/v1/posts`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
             body: JSON.stringify({
                 title: titleInput.value,
                 content: contentText.value,
             }),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                alert(data.msg);
-            });
+        }).then((data) => {
+            alert(data.msg);
+        });
     };
 
     return (
